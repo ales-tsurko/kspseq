@@ -23,6 +23,7 @@ on listener
     { событие по длине секвенции }
     if NI_SONG_POSITION mod Sequencer.state[0].step_dur_in_ticks = 0
       message((NI_SONG_POSITION mod Sequencer.state[0].length_in_ticks) / Sequencer.state[0].step_dur_in_ticks)
+      { message(View.seqs[1] -> value) }
     end if
   end if
 end on

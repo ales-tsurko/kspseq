@@ -3,21 +3,6 @@ define MAX_NUMBER_OF_STEPS := 64
 define LINE_HEIGHT := 50
 
 macro init_view()
-  const StepLength
-    WHOLE
-    HALF_T
-    HALF
-    QUARTER_T
-    QUARTER
-    EIGHT_T
-    EIGHT
-    SIXTEENTH_T
-    SIXTEENTH
-    THIRTYSECOND_T
-    THIRTYSECOND
-    SIXTYFOURTH
-  end const
-
   family View
     declare pers ui_value_edit noteNumbers[NUM_OF_SEQ_VOICES] (0, 127, 1)
     declare pers ui_value_edit numbersOfSteps[NUM_OF_SEQ_VOICES] (1, MAX_NUMBER_OF_STEPS, 1)
@@ -34,10 +19,7 @@ end macro
 
 { initializes views default values, positions, labels etc. }
 function __configure_view()
-  import "Types.ksp"
-
   make_perfview()
-
 
   declare @strValue
   declare i
@@ -101,6 +83,11 @@ function __configure_view()
   set_ui_height_px(350)
 end function
 
+{
+///
+Utility
+///
+}
 macro update_table_steps(#n#)
   set_table_steps_shown(View.seqs#n#, View.numbersOfSteps[#n#] -> value)
 end macro
