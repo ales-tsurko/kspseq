@@ -1,0 +1,39 @@
+import "View.ksp"
+import "Sequencer.ksp"
+
+macro init_view_controller
+  init_view()
+  init_sequencer()
+end macro
+
+{
+///
+ACTIONS
+///
+}
+
+{ Number of Steps }
+macro num_of_steps_action(#n#)
+  on ui_control(View.numbersOfSteps#n#)
+    update_table_steps(#n#)
+
+    Sequencer.state[#n#].length_in_ticks := Sequencer.state[#n#].step_dur_in_ticks * View.numbersOfSteps[#n#] -> value
+  end on
+end macro
+iterate_macro(num_of_steps_action) := 0 to NUM_OF_SEQ_VOICES-1
+
+{ Duration }
+macro duration_action(#n#)
+  on ui_control(View.stepLengths#n#)
+    Sequencer.state[#n#].step_dur_in_ticks := step_length_type_to_ticks(View.stepLengths[#n#] -> value)
+  end on
+end macro
+iterate_macro(duration_action) := 0 to NUM_OF_SEQ_VOICES-1
+
+{ Note Number }
+macro note_number_action(#n#)
+  on ui_control(View.noteNumbers#n#)
+    Sequencer.state[#n#].note := View.noteNumbers[#n#] -> value
+  end on
+end macro
+iterate_macro(note_number_action) := 0 to NUM_OF_SEQ_VOICES-1

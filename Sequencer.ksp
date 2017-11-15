@@ -1,0 +1,57 @@
+define TICKS_PER_BEAT := 960
+
+struct SequenceState
+  declare step_dur_in_ticks := 960
+  declare note := 60
+  declare length_in_ticks := TICKS_PER_BEAT * 16 { step_dur_in_ticks * numberOfSteps }
+end struct
+
+macro init_sequencer()
+  family Sequencer
+    declare &SequenceState state[NUM_OF_SEQ_VOICES]
+  end family
+
+  set_listener(NI_SIGNAL_TIMER_BEAT, 24)
+end macro
+
+on note
+  ignore_event(EVENT_ID)
+end on
+
+on listener
+  if NI_SIGNAL_TYPE = NI_SIGNAL_TIMER_BEAT and NI_TRANSPORT_RUNNING > 0
+    { событие по длине секвенции }
+    if NI_SONG_POSITION mod Sequencer.state[0].step_dur_in_ticks = 0
+      message((NI_SONG_POSITION mod Sequencer.state[0].length_in_ticks) / Sequencer.state[0].step_dur_in_ticks)
+    end if
+  end if
+end on
+
+function step_length_type_to_ticks(step_length) -> ticks
+    select(step_length)
+      case StepLength.WHOLE
+        ticks := TICKS_PER_BEAT * 4
+      case StepLength.HALF_T
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 1.33333333)
+      case StepLength.HALF
+        ticks := TICKS_PER_BEAT * 2
+      case StepLength.QUARTER_T
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.666666667)
+      case StepLength.QUARTER
+        ticks := TICKS_PER_BEAT
+      case StepLength.EIGHT_T
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.33333333)
+      case StepLength.EIGHT
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.5)
+      case StepLength.SIXTEENTH_T
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.16666667)
+      case StepLength.SIXTEENTH
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.25)
+      case StepLength.THIRTYSECOND_T
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.083333333)
+      case StepLength.THIRTYSECOND
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.125)
+      case StepLength.SIXTYFOURTH
+        ticks := real_to_int(int_to_real(TICKS_PER_BEAT) * 0.0625)
+    end select
+end function

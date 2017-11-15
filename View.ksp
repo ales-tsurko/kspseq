@@ -1,0 +1,107 @@
+define NUM_OF_SEQ_VOICES := 6
+define MAX_NUMBER_OF_STEPS := 64
+define LINE_HEIGHT := 50
+
+macro init_view()
+  const StepLength
+    WHOLE
+    HALF_T
+    HALF
+    QUARTER_T
+    QUARTER
+    EIGHT_T
+    EIGHT
+    SIXTEENTH_T
+    SIXTEENTH
+    THIRTYSECOND_T
+    THIRTYSECOND
+    SIXTYFOURTH
+  end const
+
+  family View
+    declare pers ui_value_edit noteNumbers[NUM_OF_SEQ_VOICES] (0, 127, 1)
+    declare pers ui_value_edit numbersOfSteps[NUM_OF_SEQ_VOICES] (1, MAX_NUMBER_OF_STEPS, 1)
+    declare pers ui_menu stepLengths[NUM_OF_SEQ_VOICES]
+    declare pers ui_table seqs[NUM_OF_SEQ_VOICES] [MAX_NUMBER_OF_STEPS] (4, 2, 10)
+  end family
+
+  __configure_view()
+
+  iterate_macro(update_table_steps) := 0 to NUM_OF_SEQ_VOICES-1
+
+  message("")
+end macro
+
+{ initializes views default values, positions, labels etc. }
+function __configure_view()
+  import "Types.ksp"
+
+  make_perfview()
+
+
+  declare @strValue
+  declare i
+  { fill up length menus }
+  macro init_lenghts_menus(#n#)
+    for i := 0 to StepLength.SIZE-1
+      select(i)
+        case StepLength.WHOLE
+          strValue := "1"
+        case StepLength.HALF_T
+          strValue := "1/2T"
+        case StepLength.HALF
+          strValue := "1/2"
+        case StepLength.QUARTER_T
+          strValue := "1/4T"
+        case StepLength.QUARTER
+          strValue := "1/4"
+        case StepLength.EIGHT_T
+          strValue := "1/8T"
+        case StepLength.EIGHT
+          strValue := "1/8"
+        case StepLength.SIXTEENTH_T
+          strValue := "1/16T"
+        case StepLength.SIXTEENTH
+          strValue := "1/16"
+        case StepLength.THIRTYSECOND_T
+          strValue := "1/32T"
+        case StepLength.THIRTYSECOND
+          strValue := "1/32"
+        case StepLength.SIXTYFOURTH
+          strValue := "1/64"
+      end select
+      add_menu_item(View.stepLengths#n#, strValue, 0)
+    end for
+  end macro
+  iterate_macro(init_lenghts_menus) := 0 to NUM_OF_SEQ_VOICES-1
+
+  family ViewOffset
+    declare x := 10
+    declare y := 20
+  end family
+  declare seq_width := 400
+  declare right_column_x := 520
+  for i := 0 to NUM_OF_SEQ_VOICES-1
+    View.noteNumbers[i] -> text := "Note"
+    View.noteNumbers[i] -> default_value := 60
+    View.noteNumbers[i] -> value := 60
+    set_bounds(View.noteNumbers[i], ViewOffset.x, i*LINE_HEIGHT+ViewOffset.y)
+
+    set_bounds(View.seqs[i], ViewOffset.x+100, i*LINE_HEIGHT+ViewOffset.y, seq_width, LINE_HEIGHT)
+
+    View.stepLengths[i] -> default_value := StepLength.SIXTEENTH
+    View.stepLengths[i] -> value := StepLength.SIXTEENTH
+    set_bounds(View.stepLengths[i], ViewOffset.x+right_column_x, i*LINE_HEIGHT+ViewOffset.y)
+
+    View.numbersOfSteps[i] -> text := "Steps Num."
+    View.numbersOfSteps[i] -> value := 16
+    set_bounds(View.numbersOfSteps[i], ViewOffset.x+right_column_x, LINE_HEIGHT/2+i*LINE_HEIGHT+ViewOffset.y)
+  end for
+
+  set_ui_height_px(350)
+end function
+
+macro update_table_steps(#n#)
+  set_table_steps_shown(View.seqs#n#, View.numbersOfSteps[#n#] -> value)
+end macro
+
