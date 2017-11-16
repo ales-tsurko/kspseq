@@ -8,6 +8,44 @@ macro init_view_controller
   init_sequencer()
 end macro
 
+on persistence_changed
+  iterate_macro(update_table_steps) := 0 to NUM_OF_SEQ_VOICES-1
+  reload_sequencer()
+end on
+
+{
+updates length of a sequence
+}
+macro update_sequence_length(#n#)
+	Sequencer.state[#n#].length_in_ticks := Sequencer.state[#n#].step_dur_in_ticks * View.numbersOfSteps[#n#] -> value
+end macro
+
+{
+updates note of a sequence
+}
+macro update_sequence_note(#n#)
+	Sequencer.state[#n#].note := View.noteNumbers[#n#] -> value
+end macro
+
+{
+updates step dur (in ticks) of a sequence
+}
+macro update_sequence_step_dur(#n#)
+	Sequencer.state[#n#].step_dur_in_ticks := step_length_type_to_ticks(View.stepLengths[#n#] -> value)
+	update_sequence_length(#n#)
+end macro
+
+{
+updates all sequencer state
+}
+function reload_sequencer()
+	macro reload_seq_macro(#n#)
+		update_sequence_note(#n#)
+		update_sequence_step_dur(#n#)
+	end macro
+	iterate_macro(reload_seq_macro) := 0 to NUM_OF_SEQ_VOICES-1
+end function
+
 {
 ///
 ACTIONS
@@ -26,8 +64,7 @@ iterate_macro(num_of_steps_action) := 0 to NUM_OF_SEQ_VOICES-1
 { Duration }
 macro duration_action(#n#)
   on ui_control(View.stepLengths#n#)
-    Sequencer.state[#n#].step_dur_in_ticks := step_length_type_to_ticks(View.stepLengths[#n#] -> value)
-    update_sequence_length(#n#)
+    update_sequence_step_dur(#n#)
   end on
 end macro
 iterate_macro(duration_action) := 0 to NUM_OF_SEQ_VOICES-1
@@ -35,7 +72,7 @@ iterate_macro(duration_action) := 0 to NUM_OF_SEQ_VOICES-1
 { Note Number }
 macro note_number_action(#n#)
   on ui_control(View.noteNumbers#n#)
-    Sequencer.state[#n#].note := View.noteNumbers[#n#] -> value
+    update_sequence_note(#n#)
   end on
 end macro
 iterate_macro(note_number_action) := 0 to NUM_OF_SEQ_VOICES-1

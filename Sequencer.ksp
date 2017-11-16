@@ -38,7 +38,7 @@ end on
 gets probability from 0 to max_prob and plays (or not) a note with this probability
 }
 function play_note_probabilistic(note_num, velocity, duration, probability, max_prob)
-  if random(1, max_prob) < probability
+  if random(1, max_prob) <= probability
     play_note(note_num, velocity, 0, duration)
   end if
 end function
@@ -74,10 +74,3 @@ function step_length_type_to_ticks(step_length) -> ticks
         ticks := real_to_int(round(int_to_real(TICKS_PER_BEAT) * 0.0625))
     end select
 end function
-
-{
-updates length of sequence
-}
-macro update_sequence_length(#n#)
-	Sequencer.state[#n#].length_in_ticks := Sequencer.state[#n#].step_dur_in_ticks * View.numbersOfSteps[#n#] -> value
-end macro
