@@ -8,6 +8,5 @@ import "ViewController.ksp"
 }
 
 on init
-  tcm.init(127)
   init_view_controller()
 end on

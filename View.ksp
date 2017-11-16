@@ -1,6 +1,6 @@
 define NUM_OF_SEQ_VOICES := 6
 define MAX_NUMBER_OF_STEPS := 64
-define LINE_HEIGHT := 50
+define LINE_HEIGHT := 75
 define SEQ_MAX_VALUE := 100
 
 macro init_view()
@@ -9,6 +9,7 @@ macro init_view()
     declare pers ui_value_edit numbersOfSteps[NUM_OF_SEQ_VOICES] (1, MAX_NUMBER_OF_STEPS, 1)
     declare pers ui_menu stepLengths[NUM_OF_SEQ_VOICES]
     declare pers ui_table seqs[NUM_OF_SEQ_VOICES] [MAX_NUMBER_OF_STEPS] (4, 2, SEQ_MAX_VALUE)
+    declare pers ui_table seqs_playhead[NUM_OF_SEQ_VOICES] [MAX_NUMBER_OF_STEPS] (4, 1, 1)
   end family
 
   __configure_view()
@@ -70,7 +71,11 @@ function __configure_view()
     View.noteNumbers[i] -> value := 60
     set_bounds(View.noteNumbers[i], ViewOffset.x, i*LINE_HEIGHT+ViewOffset.y)
 
-    set_bounds(View.seqs[i], ViewOffset.x+100, i*LINE_HEIGHT+ViewOffset.y, seq_width, LINE_HEIGHT)
+    {sequencer}
+    set_bounds(View.seqs[i], ViewOffset.x+100, i*LINE_HEIGHT+ViewOffset.y, seq_width, LINE_HEIGHT/3*2)
+    {playhead}
+    set_bounds(View.seqs_playhead[i], ViewOffset.x+100, i*LINE_HEIGHT+(LINE_HEIGHT/3*2)+ViewOffset.y, seq_width, LINE_HEIGHT/3)
+		View.seqs_playhead[i] -> bar_color := 0x15c14b
 
     View.stepLengths[i] -> default_value := StepLength.SIXTEENTH
     View.stepLengths[i] -> value := StepLength.SIXTEENTH
@@ -81,7 +86,7 @@ function __configure_view()
     set_bounds(View.numbersOfSteps[i], ViewOffset.x+right_column_x, LINE_HEIGHT/2+i*LINE_HEIGHT+ViewOffset.y)
   end for
 
-  set_ui_height_px(350)
+  set_ui_height_px(LINE_HEIGHT*NUM_OF_SEQ_VOICES+50)
 end function
 
 {
@@ -91,5 +96,15 @@ Utility
 }
 macro update_table_steps(#n#)
   set_table_steps_shown(View.seqs#n#, View.numbersOfSteps[#n#] -> value)
+  set_table_steps_shown(View.seqs_playhead#n#, View.numbersOfSteps[#n#] -> value)
 end macro
 
+function set_playhead_position(seq, step_num, num_of_steps)
+	if step_num-1 < 0
+		seq[num_of_steps-1] := 0
+	else
+		seq[step_num-1 mod num_of_steps] := 0
+	end if
+	
+	seq[step_num] := 1
+end function

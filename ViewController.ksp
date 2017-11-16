@@ -18,8 +18,7 @@ ACTIONS
 macro num_of_steps_action(#n#)
   on ui_control(View.numbersOfSteps#n#)
     update_table_steps(#n#)
-
-    Sequencer.state[#n#].length_in_ticks := Sequencer.state[#n#].step_dur_in_ticks * View.numbersOfSteps[#n#] -> value
+    update_sequence_length(#n#)
   end on
 end macro
 iterate_macro(num_of_steps_action) := 0 to NUM_OF_SEQ_VOICES-1
@@ -28,6 +27,7 @@ iterate_macro(num_of_steps_action) := 0 to NUM_OF_SEQ_VOICES-1
 macro duration_action(#n#)
   on ui_control(View.stepLengths#n#)
     Sequencer.state[#n#].step_dur_in_ticks := step_length_type_to_ticks(View.stepLengths[#n#] -> value)
+    update_sequence_length(#n#)
   end on
 end macro
 iterate_macro(duration_action) := 0 to NUM_OF_SEQ_VOICES-1
